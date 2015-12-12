@@ -22,7 +22,7 @@ function varargout = viewcall_gui(varargin)
 
 % Edit the above text to modify the response to help viewcall_gui
 
-% Last Modified by GUIDE v2.5 04-Dec-2015 14:19:53
+% Last Modified by GUIDE v2.5 11-Dec-2015 15:21:10
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,13 +57,14 @@ if not(handles.dir)
     error('No directory selected.')
 end
 cd(handles.dir);
-handles.d_struct = dir([handles.dir '\*.wav']);
+handles.d_struct = dir([handles.dir '/*.WAV']);
+handles.start_path = '';
 
 while isempty(handles.d_struct)
-    h = msgbox('No .wav files found. Please close the GUI and select another directory.','Error','error');   
+    h = msgbox('No .WAV files found. Please close the GUI and select another directory.','Error','error');   
     uiwait(h);
     handles.dir = uigetdir;
-    handles.d_struct = dir([handles.dir '\*.wav']);
+    handles.d_struct = dir([handles.dir '/*.WAV']);
 end
 handles.struct_index = 1;
 handles = get_info(hObject,handles);
@@ -156,6 +157,7 @@ function pushbutton3_Callback(hObject, eventdata, handles) %SPLICE
     splices = vec_splice(handles.current_data,x_times,handles.axes1.XLim(2));
     setappdata(0,'splices',splices);
     setappdata(0,'file_name',handles.file_name);
+    delete(lines);
     splice_gui; 
     
 function vec_splices = vec_splice(vec,times,xlim) %takes an array of time intervals and splices the vector accordingly; returns cell array of vectors
@@ -244,7 +246,7 @@ function handles=get_info(varargin) %MODIFIES THE HANDLE WITH UPDATED DATA
     handles = varargin{2};
     handles.current_file = handles.d_struct(handles.struct_index);
     handles.file_name = handles.current_file.name;
-    [handles.current_data, handles.fs] = audioread([handles.dir '\' handles.file_name]);
+    [handles.current_data, handles.fs] = audioread([handles.dir '/' handles.file_name]);
     handles.g_noise=0.0000001*randn(size(handles.current_data)); %gaussian noise used to calculate threshold value
     handles.thresh=-snr(handles.current_data,handles.g_noise); %threshold value for spectrogram
     handles.zoom = 1;
@@ -309,7 +311,7 @@ function pushbutton9_Callback(hObject, eventdata, handles) %JUMP TO FILE
 % hObject    handle to pushbutton9 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    answer = uigetfile('.\*.wav'); 
+    answer = uigetfile('./*.WAV'); 
     if not(answer)
         answer = handles.file_name;
     end
@@ -333,3 +335,20 @@ function pushbutton14_Callback(hObject, eventdata, handles)
     handles.zoom = not(handles.zoom);
     guidata(hObject,handles);
     
+
+
+% --- Executes on button press in pushbutton18.
+function pushbutton18_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    answer = uigetdir(handles.start_path);
+    if isempty(answer)
+        return
+    elseif not(strcmp(fileparts(answer),handles.start_path))
+        handles.start_path = fileparts(answer); %gets parent folder
+    end
+    copyfile(handles.file_name,answer);
+    
+    guidata(hObject,handles);
+        

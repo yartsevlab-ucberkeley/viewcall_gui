@@ -182,5 +182,6 @@ function pushbutton9_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton9 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    folder_name = [uigetdir('') '/'];
     syllables = handles.vec_cell;
-    save([handles.file_name(1:end-4) '.mat'],'syllables');
+    save([folder_name handles.file_name(1:end-4) '.MAT'],'syllables');
